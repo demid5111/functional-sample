@@ -7,6 +7,10 @@ import {
     reduce as _reduce
 } from 'lodash';
 
+import {Observable} from "rxjs/Observable";
+import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/observable/of';
+
 // ---------------------------------------------------------------------
 // preparations
 // ---------------------------------------------------------------------
@@ -26,16 +30,29 @@ const originalCart = [
     }
 ];
 
-const currencyRates = {
-    'rubles': 59.97,
-    'euros': 0.85,
-    'dollars': 1.0,
-    'pounds': 0.77,
-    'yens': 110.69
-};
+// ---------------------------------------------------------------------
+// retrieval logic
+// ---------------------------------------------------------------------
+
+const loadRates = (url: string) => Observable.create(((observer) => {
+        let xhr = new XMLHttpRequest();
+
+        xhr.addEventListener('load', () => {
+            if (xhr.status === 200) {
+                let data = JSON.parse(xhr.responseText);
+                observer.next(data);
+                observer.complete();
+            } else {
+                observer.error(xhr.statusText);
+            }
+        });
+
+        xhr.open('GET', url);
+        xhr.send();
+    }));
 
 // ---------------------------------------------------------------------
-// logic
+// calculation logic
 // ---------------------------------------------------------------------
 
 const getPrice = (o) => o.price;
@@ -46,14 +63,19 @@ const calculateTotal = (curRates, totalSum) => _reduce(_keys(curRates), (acc, ke
     return acc;
 }, {});
 
-const getTotalCart = (cart) =>
-    _flow(
-        getPrices,
-        _sum,
-        <Function>_partial(calculateTotal, currencyRates)
-    )(cart);
+const calculateTotalCart = (cart, rates) => _flow(
+    getPrices,
+    _sum,
+    <Function>_partial(calculateTotal, rates)
+)(cart);
+
+const getTotalCart = (cart, url: string) => loadRates(url)
+    .flatMap((rates) => Observable.of(calculateTotalCart(cart, rates)));
+
 // ---------------------------------------------------------------------
 // usage
 // ---------------------------------------------------------------------
 
-console.log(getTotalCart(originalCart));
+getTotalCart(originalCart, 'rates.json')
+    .subscribe((data) => console.log(data));
+
