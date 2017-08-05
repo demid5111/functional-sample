@@ -1,4 +1,11 @@
-import * as _ from 'lodash';
+import {
+    flow as _flow,
+    keys as _keys,
+    map as _map,
+    partial as _partial,
+    sum as _sum,
+    reduce as _reduce
+} from 'lodash';
 
 // ---------------------------------------------------------------------
 // preparations
@@ -32,23 +39,21 @@ const currencyRates = {
 // ---------------------------------------------------------------------
 
 const getPrice = (o) => o.price;
+const getPrices = (cart) => _map(cart, getPrice);
 
-const accumulateCart = (cart) => _.reduce(cart, (acc, el) => {
-    acc += getPrice(el);
-    return acc;
-}, 0);
-
-const calculateTotalCart = (totalSum, currencyRates) => _.reduce(_.keys(currencyRates), (acc, key) => {
-    acc[key] = currencyRates[key] * totalSum;
+const calculateTotal = (curRates, totalSum) => _reduce(_keys(curRates), (acc, key) => {
+    acc[key] = curRates[key] * totalSum;
     return acc;
 }, {});
 
+const getTotalCart = (cart) =>
+    _flow(
+        getPrices,
+        _sum,
+        <Function>_partial(calculateTotal, currencyRates)
+    )(cart);
 // ---------------------------------------------------------------------
-//
+// usage
 // ---------------------------------------------------------------------
 
-const res = calculateTotalCart(accumulateCart(originalCart), currencyRates);
-console.log(res);
-
-
-
+console.log(getTotalCart(originalCart));
