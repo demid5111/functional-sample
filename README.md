@@ -1,4 +1,7 @@
-### QA
+The task is to functionally solve the simple problem:
 
-To generate typings for es6, perform:
-`node_modules/.bin/typings install dt~es6-shim --global --save`.
+Having the plain JS object with prices in US dollars:
+ 1. accumulate those prices;
+ 2. retrieve rates from server
+ 3. convert accumulated price to each known currency
+ 
