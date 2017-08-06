@@ -4,8 +4,6 @@
 
 import {
     flow as _flow,
-    keys as _keys,
-    map as _map,
     partial as _partial,
     reduce as _reduce,
     sum as _sum,
@@ -15,7 +13,7 @@ import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/observable/of';
 
-import {Cart, CartRates, ConversionRates, PriceRate, Product} from './models';
+import {Cart, CartRates, ConversionRates, PriceRate} from './models';
 
 // ---------------------------------------------------------------------
 // retrieval logic
@@ -60,6 +58,4 @@ export const calculateTotalCart = (cart: Cart, rates: ConversionRates): CartRate
 
 export const getTotalCart = (cart: Cart, url: string): Observable<CartRates> =>
     loadRates(url)
-        .flatMap((rates: ConversionRates) => {
-    return Observable.of(calculateTotalCart(cart, rates))
-        });
+        .flatMap((rates: ConversionRates) => Observable.of(calculateTotalCart(cart, rates)));
