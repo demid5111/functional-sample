@@ -1,5 +1,5 @@
 module.exports = {
-    entry: "./main",
+    entry: "./src/main",
     output: {
         filename: "app.js"
     },
@@ -15,6 +15,6 @@ module.exports = {
         ]
     },
     resolve: {
-        extensions: [".ts", ".js"],
+        extensions: [".ts", ".js"]
     }
 };
